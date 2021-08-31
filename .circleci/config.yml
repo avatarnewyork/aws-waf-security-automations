@@ -28,7 +28,8 @@ jobs:
 
       - run:
           description: running unit tests
-          command:
+          command: |
+            cd project
             cd ./deployment 
             chmod +x ./run-unit-tests.sh
             ./run-unit-tests.sh
