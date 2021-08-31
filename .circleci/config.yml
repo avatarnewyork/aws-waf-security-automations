@@ -51,9 +51,9 @@ jobs:
           command: |
             # export vars
             if [[ $CIRCLE_BRANCH == 'master' ]]; then
-              $BRANCH_NAME=''
+              BRANCH_NAME=''
             else
-              $BRANCH_NAME="-$CIRCLE_BRANCH"
+              BRANCH_NAME="-${CIRCLE_BRANCH}"
             fi
             
             export TEMPLATE_OUTPUT_BUCKET=avatar-waf-security-automations-template-stage
