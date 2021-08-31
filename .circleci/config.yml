@@ -43,7 +43,11 @@ jobs:
           aws-region: AWS_DEFAULT_REGION
           aws-secret-access-key: AWS_REGION_STAGE
           role-arn: arn:aws:iam::001650231941:role/service-role/AvatarProtonServiceRole
-          
+
+      - aws-assume-role/assume_role:
+          account: $AWS_ACCOUNT_ID
+          role: $AWS_ASSUME_ROLE_NAME          
+      
       # might have to install if ssh-ing
       #- run: apt-get update && apt-get install -y groff
       - run:
