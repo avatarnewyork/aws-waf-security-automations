@@ -5,7 +5,8 @@ version: 2.1
 orbs:
   aws-cli: circleci/aws-cli@2.0.3  
   aws-assume-role: holdaraffle/aws-assume-role@0.0.10
-
+  aws-sam: circleci/aws-sam-serverless@2.1.0
+  
 executors:
   default:
     resource_class: xlarge
@@ -19,6 +20,15 @@ parameters:
   template:
     type: string
     default: ''
+
+commands:
+  aws-sam-assume-role:
+    description: install aws sam and assume role
+    steps:
+      - aws-sam/install
+      - aws-assume-role/assume_role:
+          account: $AWS_ACCOUNT_ID
+          role: $AWS_ASSUME_ROLE_NAME          
     
 jobs:
   run-unit-tests:
@@ -38,14 +48,15 @@ jobs:
     steps:
       - checkout
       
-      - aws-cli/setup:
-          aws-access-key-id: AWS_ACCESS_KEY_ID
-          aws-region: AWS_DEFAULT_REGION
-          aws-secret-access-key: AWS_SECRET_ACCESS_KEY
+      #- aws-cli/setup:
+      #    aws-access-key-id: AWS_ACCESS_KEY_ID
+      #    aws-region: AWS_DEFAULT_REGION
+      #    aws-secret-access-key: AWS_SECRET_ACCESS_KEY
 
-      - aws-assume-role/assume_role:
-          account: $AWS_ACCOUNT_ID
-          role: $AWS_ASSUME_ROLE_NAME          
+      #- aws-assume-role/assume_role:
+      #    account: $AWS_ACCOUNT_ID
+      #    role: $AWS_ASSUME_ROLE_NAME
+      - aws-sam-assume-role      
       
       # might have to install if ssh-ing
       #- run: apt-get update && apt-get install -y groff
