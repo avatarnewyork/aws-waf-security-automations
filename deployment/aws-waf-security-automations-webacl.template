@@ -386,6 +386,8 @@ Resources:
               ManagedRuleGroupStatement:
                 VendorName: AWS
                 Name: AWSManagedRulesCommonRuleSet
+                ExcludedRules:
+                  - Name: GenericRFI_BODY
           - !Ref 'AWS::NoValue'
         - Name: !Sub '${ParentStackName}WhitelistRule'
           Priority: 1
