@@ -39,10 +39,9 @@ jobs:
       - checkout
       
       - aws-cli/setup:
-          aws-access-key-id: AWS_SECRET_ACCESS_KEY
+          aws-access-key-id: AWS_ACCESS_KEY_ID
           aws-region: AWS_DEFAULT_REGION
-          aws-secret-access-key: AWS_REGION_STAGE
-          role-arn: arn:aws:iam::001650231941:role/service-role/AvatarProtonServiceRole
+          aws-secret-access-key: AWS_SECRET_ACCESS_KEY
 
       - aws-assume-role/assume_role:
           account: $AWS_ACCOUNT_ID
