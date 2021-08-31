@@ -44,7 +44,7 @@ jobs:
             ./run-unit-tests.sh
             
   build-deploy:
-    executor: default
+    executor: aws-sam/default
     steps:
       - checkout
       
