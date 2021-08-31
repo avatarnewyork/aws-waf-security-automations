@@ -400,8 +400,17 @@ Resources:
               Statements:
                 - IPSetReferenceStatement:
                     Arn: !GetAtt WAFWhitelistSetV4.Arn
+                    IPSetForwardedIPConfig:
+                      FallbackBehavior: MATCH
+                      HeaderName: X-Forwarded-For
+                      Position: FIRST               
                 - IPSetReferenceStatement:
                     Arn: !GetAtt WAFWhitelistSetV6.Arn
+                    IPSetForwardedIPConfig:
+                      FallbackBehavior: MATCH
+                      HeaderName: X-Forwarded-For
+                      Position: FIRST               
+                    
         - Name: !Sub '${ParentStackName}BlacklistRule'
           Priority: 2
           Action:
@@ -415,8 +424,17 @@ Resources:
               Statements:
                 - IPSetReferenceStatement:
                     Arn: !GetAtt WAFBlacklistSetV4.Arn
+                    IPSetForwardedIPConfig:
+                      FallbackBehavior: MATCH
+                      HeaderName: X-Forwarded-For
+                      Position: FIRST                                   
                 - IPSetReferenceStatement:
                     Arn: !GetAtt WAFBlacklistSetV6.Arn
+                    IPSetForwardedIPConfig:
+                      FallbackBehavior: MATCH
+                      HeaderName: X-Forwarded-For
+                      Position: FIRST               
+                    
         - !If
           - HttpFloodProtectionLogParserActivated
           - Name: !Sub '${ParentStackName}HttpFloodRegularRule'
@@ -432,8 +450,16 @@ Resources:
                 Statements:
                   - IPSetReferenceStatement:
                       Arn: !GetAtt WAFHttpFloodSetV4.Arn
+                      IPSetForwardedIPConfig:
+                        FallbackBehavior: MATCH
+                        HeaderName: X-Forwarded-For
+                        Position: FIRST                                     
                   - IPSetReferenceStatement:
                       Arn: !GetAtt WAFHttpFloodSetV6.Arn
+                      IPSetForwardedIPConfig:
+                        FallbackBehavior: MATCH
+                        HeaderName: X-Forwarded-For
+                        Position: FIRST                                     
           - !Ref 'AWS::NoValue'
         - !If
           - HttpFloodProtectionRateBasedRuleActivated
@@ -465,8 +491,17 @@ Resources:
                 Statements:
                   - IPSetReferenceStatement:
                       Arn: !GetAtt WAFScannersProbesSetV4.Arn
+                      IPSetForwardedIPConfig:
+                        FallbackBehavior: MATCH
+                        HeaderName: X-Forwarded-For
+                        Position: FIRST                                     
                   - IPSetReferenceStatement:
                       Arn: !GetAtt WAFScannersProbesSetV6.Arn
+                      IPSetForwardedIPConfig:
+                        FallbackBehavior: MATCH
+                        HeaderName: X-Forwarded-For
+                        Position: FIRST               
+                      
           - !Ref 'AWS::NoValue'
         - !If
           - ReputationListsProtectionActivated
@@ -481,10 +516,18 @@ Resources:
             Statement:
               OrStatement:
                 Statements:
-                  - IPSetReferenceStatement:
+                  - IPSetReferenceStatement:                      
                       Arn: !GetAtt WAFReputationListsSetV4.Arn
+                      IPSetForwardedIPConfig:
+                        FallbackBehavior: MATCH
+                        HeaderName: X-Forwarded-For
+                        Position: FIRST                                     
                   - IPSetReferenceStatement:
                       Arn: !GetAtt WAFReputationListsSetV6.Arn
+                      IPSetForwardedIPConfig:
+                        FallbackBehavior: MATCH
+                        HeaderName: X-Forwarded-For
+                        Position: FIRST                                                           
           - !Ref 'AWS::NoValue'
         - !If
           - BadBotProtectionActivated
@@ -501,8 +544,16 @@ Resources:
                 Statements:
                   - IPSetReferenceStatement:
                       Arn: !GetAtt WAFBadBotSetV4.Arn
+                      IPSetForwardedIPConfig:
+                        FallbackBehavior: MATCH
+                        HeaderName: X-Forwarded-For
+                        Position: FIRST                                                           
                   - IPSetReferenceStatement:
                       Arn: !GetAtt WAFBadBotSetV6.Arn
+                      IPSetForwardedIPConfig:
+                        FallbackBehavior: MATCH
+                        HeaderName: X-Forwarded-For
+                        Position: FIRST                                                           
           - !Ref 'AWS::NoValue'
         - !If
           - SqlInjectionProtectionActivated
