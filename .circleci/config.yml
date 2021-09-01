@@ -44,19 +44,20 @@ jobs:
             ./run-unit-tests.sh
             
   build-deploy:
-    executor: aws-sam/default
+    #executor: aws-sam/default
+    executor: default
     steps:
       - checkout
       
-      #- aws-cli/setup:
-      #    aws-access-key-id: AWS_ACCESS_KEY_ID
-      #    aws-region: AWS_DEFAULT_REGION
-      #    aws-secret-access-key: AWS_SECRET_ACCESS_KEY
+      - aws-cli/setup:
+          aws-access-key-id: AWS_ACCESS_KEY_ID
+          aws-region: AWS_DEFAULT_REGION
+          aws-secret-access-key: AWS_SECRET_ACCESS_KEY
 
       #- aws-assume-role/assume_role:
       #    account: $AWS_ACCOUNT_ID
       #    role: $AWS_ASSUME_ROLE_NAME
-      - aws-sam-assume-role      
+      #- aws-sam-assume-role      
       
       # might have to install if ssh-ing
       #- run: apt-get update && apt-get install -y groff
