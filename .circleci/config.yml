@@ -86,10 +86,15 @@ jobs:
             aws s3 cp ./deployment/global-s3-assets s3://$TEMPLATE_OUTPUT_BUCKET/$SOLUTION_NAME/$VERSION --recursive --acl bucket-owner-full-control
             aws s3 cp ./deployment/regional-s3-assets s3://$DIST_OUTPUT_BUCKET/$SOLUTION_NAME/$VERSION --recursive --acl bucket-owner-full-control
 
+            
             # get existing parameters
             aws cloudformation describe-stacks --region=$AWS_REGION --stack-name "AWSWAFSecurityAutomations-stage${BRANCH_NAME}" | jq -rc '.Stacks[0].Parameters' >parameters.json
+            echo "Using Parameters: "
+            cat parameters.json
+            
             # update stack with new template and existing parameters
             aws cloudformation update-stack --region $AWS_REGION --stack-name "AWSWAFSecurityAutomations-stage${BRANCH_NAME}" --template-url=https://$TEMPLATE_OUTPUT_BUCKET.s3.us-west-2.amazonaws.com/$SOLUTION_NAME/$VERSION/aws-waf-security-automations.template --parameters file://parameters.json --capabilities CAPABILITY_IAM
+            echo "Cloudformation Updated"
             
 workflows:
   version: 2.1
