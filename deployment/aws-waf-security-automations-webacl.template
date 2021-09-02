@@ -402,7 +402,7 @@ Resources:
             Statement:
               ManagedRuleGroupStatement:
                 VendorName: AWS
-                Name: AWS-AWSManagedRulesPHPRuleSet
+                Name: AWSManagedRulesPHPRuleSet
           - !Ref 'AWS::NoValue'          
         - !If
           - AWSManagedRulesActivated          
@@ -417,7 +417,7 @@ Resources:
             Statement:
               ManagedRuleGroupStatement:
                 VendorName: AWS
-                Name: AWS-AWSManagedRulesWordPressRuleSet
+                Name: AWSManagedRulesWordPressRuleSet
           - !Ref 'AWS::NoValue'          
         - Name: !Sub '${ParentStackName}WhitelistRule'
           Priority: 1
