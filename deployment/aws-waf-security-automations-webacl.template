@@ -389,6 +389,36 @@ Resources:
                 ExcludedRules:
                   - Name: GenericRFI_BODY
           - !Ref 'AWS::NoValue'
+        - !If
+          - AWSManagedRulesActivated          
+          - Name: AWS-AWSManagedRulesPHPRuleSet
+            Priority: 11
+            OverrideAction:
+              None: {}
+            VisibilityConfig:
+              SampledRequestsEnabled: true
+              CloudWatchMetricsEnabled: true
+              MetricName: AWS-AWSManagedRulesPHPRuleSet
+            Statement:
+              ManagedRuleGroupStatement:
+                VendorName: AWS
+                Name: AWSManagedRulesPHPRuleSet
+          - !Ref 'AWS::NoValue'          
+        - !If
+          - AWSManagedRulesActivated          
+          - Name: AWS-AWSManagedRulesWordPressRuleSet
+            Priority: 10
+            OverrideAction:
+              None: {}
+            VisibilityConfig:
+              SampledRequestsEnabled: true
+              CloudWatchMetricsEnabled: true
+              MetricName: AWS-AWSManagedRulesWordPressRuleSet
+            Statement:
+              ManagedRuleGroupStatement:
+                VendorName: AWS
+                Name: AWSManagedRulesWordPressRuleSet
+          - !Ref 'AWS::NoValue'          
         - Name: !Sub '${ParentStackName}WhitelistRule'
           Priority: 1
           Action:

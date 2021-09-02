@@ -1,0 +1,160 @@
+version: 2.1
+
+# the path-filtering orb is required to continue a pipeline based on
+# the path of an updated fileset
+orbs:
+  aws-cli: circleci/aws-cli@2.0.3  
+  aws-assume-role: holdaraffle/aws-assume-role@0.0.10
+  aws-sam: circleci/aws-sam-serverless@2.1.0
+  
+executors:
+  default:
+    resource_class: xlarge
+    #working_directory: ~/www
+    docker:
+      - image: cimg/python:3.8.11-browsers
+  
+# the default pipeline parameters, which will be updated according to
+# the results of the path-filtering orb
+parameters:
+  template:
+    type: string
+    default: ''
+
+commands:
+  aws-sam-assume-role:
+    description: install aws sam and assume role
+    steps:
+      - aws-sam/install
+      - aws-assume-role/assume_role:
+          account: $AWS_ACCOUNT_ID
+          role: $AWS_ASSUME_ROLE_NAME          
+    
+jobs:
+  run-unit-tests:
+    executor: default
+    steps:
+      - checkout
+
+      - run:
+          description: running unit tests
+          command: |
+            cd ./deployment 
+            chmod +x ./run-unit-tests.sh
+            ./run-unit-tests.sh
+            
+  build-deploy:
+    #executor: aws-sam/default
+    executor: default
+    parameters:
+      region:
+        type: string
+        default: us-west-2
+      env_name:
+        type: string
+        default: us-east-1
+        
+    steps:
+      - checkout
+      
+      - aws-cli/setup:
+          aws-access-key-id: AWS_ACCESS_KEY_ID
+          aws-region: AWS_DEFAULT_REGION
+          aws-secret-access-key: AWS_SECRET_ACCESS_KEY
+
+      #- aws-assume-role/assume_role:
+      #    account: $AWS_ACCOUNT_ID
+      #    role: $AWS_ASSUME_ROLE_NAME
+      #- aws-sam-assume-role      
+      
+      # might have to install if ssh-ing
+      #- run: apt-get update && apt-get install -y groff
+      - run:
+          description: build setup
+          command: |
+            # export vars
+            if [[ $CIRCLE_BRANCH == 'master' ]]; then
+              BRANCH_NAME=''
+            else
+              BRANCH_NAME="-${CIRCLE_BRANCH}"
+            fi
+
+            export ENV_NAME=<<parameters.env_name>>
+            export TEMPLATE_OUTPUT_BUCKET=avatar-waf-security-automations-template-${ENV_NAME}
+            export DIST_OUTPUT_BUCKET=avatar-waf-security-automations-template-dist-${ENV_NAME}
+            export SOLUTION_NAME="aws-waf-security-automations${BRANCH_NAME}"
+            export VERSION=$CIRCLE_BUILD_NUM 
+            export AWS_REGION=<<parameters.region>>
+
+            # build
+            cd ./deployment
+            chmod +x ./build-s3-dist.sh && ./build-s3-dist.sh $TEMPLATE_OUTPUT_BUCKET $DIST_OUTPUT_BUCKET $SOLUTION_NAME $VERSION
+
+            # copy files to buckets
+            cd ../
+            aws s3 cp ./deployment/regional-s3-assets s3://$DIST_OUTPUT_BUCKET-$AWS_REGION/$SOLUTION_NAME/$VERSION --recursive --acl bucket-owner-full-control
+            aws s3 cp ./deployment/global-s3-assets s3://$TEMPLATE_OUTPUT_BUCKET/$SOLUTION_NAME/$VERSION --recursive --acl bucket-owner-full-control
+            aws s3 cp ./deployment/regional-s3-assets s3://$DIST_OUTPUT_BUCKET/$SOLUTION_NAME/$VERSION --recursive --acl bucket-owner-full-control
+
+            
+            # get existing parameters
+            aws cloudformation describe-stacks --region=$AWS_REGION --stack-name "AWSWAFSecurityAutomations-${ENV_NAME}${BRANCH_NAME}" | jq -rc '.Stacks[0].Parameters' >parameters.json
+            echo "Using Parameters: "
+            cat parameters.json
+            
+            # update stack with new template and existing parameters
+            aws cloudformation update-stack --region $AWS_REGION --stack-name "AWSWAFSecurityAutomations-${ENV_NAME}${BRANCH_NAME}" --template-url=https://$TEMPLATE_OUTPUT_BUCKET.s3.us-west-2.amazonaws.com/$SOLUTION_NAME/$VERSION/aws-waf-security-automations.template --parameters file://parameters.json --capabilities CAPABILITY_IAM
+            echo "Cloudformation Updated"
+            
+workflows:
+  version: 2.1
+  # when pipeline parameter, run-build-service-1-job is true, the
+  # build-service-1 job is triggered.
+  create-publish-workflow:
+    when: true #<< pipeline.parameters.run-create-environment-template >>
+    jobs:
+      - run-unit-tests:
+          context: org-global
+          filters:
+            tags:
+              only: /.*/
+            branches:
+              only: /.*/
+              
+      - build-deploy:
+          name: build-deploy-stage
+          context: org-global
+          region: us-west-2
+          env_name: stage
+          requires:
+            - run-unit-tests
+          filters:
+            tags:
+              only: /.*/
+            branches:
+              only: /.*/
+              
+      - confirmed-stage:          
+          type: approval
+          requires:
+            - build-deploy-stage
+          filters:
+            branches:
+              only: /.*/
+            tags:
+              only: /.*/
+              
+              
+      - build-deploy:
+          name: build-deploy-prod
+          context: org-global
+          region: us-east-1
+          env_name: prod
+          requires:
+            - confirmed-stage
+          filters:
+            tags:
+              only: /.*/
+            branches:
+              only: /.*/
+
