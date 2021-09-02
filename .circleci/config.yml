@@ -46,6 +46,14 @@ jobs:
   build-deploy:
     #executor: aws-sam/default
     executor: default
+    parameters:
+      region:
+        type: string
+        default: us-west-2
+      env_name:
+        type: string
+        default: us-east-1
+        
     steps:
       - checkout
       
@@ -70,12 +78,13 @@ jobs:
             else
               BRANCH_NAME="-${CIRCLE_BRANCH}"
             fi
-            
-            export TEMPLATE_OUTPUT_BUCKET=avatar-waf-security-automations-template-stage
-            export DIST_OUTPUT_BUCKET=avatar-waf-security-automations-template-dist-stage
+
+            export ENV_NAME=<<parameters.env_name>>
+            export TEMPLATE_OUTPUT_BUCKET=avatar-waf-security-automations-template-${ENV_NAME}
+            export DIST_OUTPUT_BUCKET=avatar-waf-security-automations-template-dist-${ENV_NAME}
             export SOLUTION_NAME="aws-waf-security-automations${BRANCH_NAME}"
             export VERSION=$CIRCLE_BUILD_NUM 
-            export AWS_REGION=us-west-2
+            export AWS_REGION=<<parameters.region>>
 
             # build
             cd ./deployment
@@ -89,12 +98,12 @@ jobs:
 
             
             # get existing parameters
-            aws cloudformation describe-stacks --region=$AWS_REGION --stack-name "AWSWAFSecurityAutomations-stage${BRANCH_NAME}" | jq -rc '.Stacks[0].Parameters' >parameters.json
+            aws cloudformation describe-stacks --region=$AWS_REGION --stack-name "AWSWAFSecurityAutomations-${ENV_NAME}${BRANCH_NAME}" | jq -rc '.Stacks[0].Parameters' >parameters.json
             echo "Using Parameters: "
             cat parameters.json
             
             # update stack with new template and existing parameters
-            aws cloudformation update-stack --region $AWS_REGION --stack-name "AWSWAFSecurityAutomations-stage${BRANCH_NAME}" --template-url=https://$TEMPLATE_OUTPUT_BUCKET.s3.us-west-2.amazonaws.com/$SOLUTION_NAME/$VERSION/aws-waf-security-automations.template --parameters file://parameters.json --capabilities CAPABILITY_IAM
+            aws cloudformation update-stack --region $AWS_REGION --stack-name "AWSWAFSecurityAutomations-${ENV_NAME}${BRANCH_NAME}" --template-url=https://$TEMPLATE_OUTPUT_BUCKET.s3.us-west-2.amazonaws.com/$SOLUTION_NAME/$VERSION/aws-waf-security-automations.template --parameters file://parameters.json --capabilities CAPABILITY_IAM
             echo "Cloudformation Updated"
             
 workflows:
@@ -113,7 +122,10 @@ workflows:
               only: /.*/
               
       - build-deploy:
+          name: build-deploy-stage
           context: org-global
+          region: us-west-2
+          env_name: stage
           requires:
             - run-unit-tests
           filters:
@@ -121,3 +133,28 @@ workflows:
               only: /.*/
             branches:
               only: /.*/
+              
+      - confirmed-stage:          
+          type: approval
+          requires:
+            - build-deploy-stage
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /.*/
+              
+              
+      - build-deploy:
+          name: build-deploy-prod
+          context: org-global
+          region: us-east-1
+          env_name: prod
+          requires:
+            - confirmed-stage
+          filters:
+            tags:
+              only: /.*/
+            branches:
+              only: /.*/
+
