@@ -140,7 +140,7 @@ workflows:
             - build-deploy-stage
           filters:
             branches:
-              ignore: /.*/
+              only: /.*/
             tags:
               only: /.*/
               
