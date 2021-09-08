@@ -613,14 +613,14 @@ Resources:
                           Type: URL_DECODE
                         - Priority: 2
                           Type: HTML_ENTITY_DECODE
-                  - XssMatchStatement:
-                      FieldToMatch:
-                        Body: {}
-                      TextTransformations:
-                        - Priority: 1
-                          Type: URL_DECODE
-                        - Priority: 2
-                          Type: HTML_ENTITY_DECODE
+                  #- XssMatchStatement:
+                  #    FieldToMatch:
+                  #      Body: {}
+                  #    TextTransformations:
+                  #      - Priority: 1
+                  #        Type: URL_DECODE
+                  #      - Priority: 2
+                  #        Type: HTML_ENTITY_DECODE
                   - XssMatchStatement:
                       FieldToMatch:
                         UriPath: {}
