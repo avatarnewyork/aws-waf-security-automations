@@ -388,6 +388,7 @@ Resources:
                 Name: AWSManagedRulesCommonRuleSet
                 ExcludedRules:
                   - Name: GenericRFI_BODY
+                  - Name: SizeRestrictions_BODY
           - !Ref 'AWS::NoValue'
         - !If
           - AWSManagedRulesActivated          
