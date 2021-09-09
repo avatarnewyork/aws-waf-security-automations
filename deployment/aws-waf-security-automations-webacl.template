@@ -388,6 +388,8 @@ Resources:
                 Name: AWSManagedRulesCommonRuleSet
                 ExcludedRules:
                   - Name: GenericRFI_BODY
+                  - Name: SizeRestrictions_BODY
+                  - Name: CrossSiteScripting_BODY
           - !Ref 'AWS::NoValue'
         - !If
           - AWSManagedRulesActivated          
@@ -662,14 +664,14 @@ Resources:
                           Type: URL_DECODE
                         - Priority: 2
                           Type: HTML_ENTITY_DECODE
-                  - XssMatchStatement:
-                      FieldToMatch:
-                        Body: {}
-                      TextTransformations:
-                        - Priority: 1
-                          Type: URL_DECODE
-                        - Priority: 2
-                          Type: HTML_ENTITY_DECODE
+                  #- XssMatchStatement:
+                  #    FieldToMatch:
+                  #      Body: {}
+                  #    TextTransformations:
+                  #      - Priority: 1
+                  #        Type: URL_DECODE
+                  #      - Priority: 2
+                  #        Type: HTML_ENTITY_DECODE
                   - XssMatchStatement:
                       FieldToMatch:
                         UriPath: {}
