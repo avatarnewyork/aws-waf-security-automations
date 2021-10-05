@@ -103,7 +103,7 @@ jobs:
             cat parameters.json
             
             # update stack with new template and existing parameters
-            aws cloudformation update-stack --region $AWS_REGION --stack-name "AWSWAFSecurityAutomations-${ENV_NAME}${BRANCH_NAME}" --template-url=https://$TEMPLATE_OUTPUT_BUCKET.s3.us-west-2.amazonaws.com/$SOLUTION_NAME/$VERSION/aws-waf-security-automations.template --parameters file://parameters.json --capabilities CAPABILITY_IAM
+            aws cloudformation update-stack --region $AWS_REGION --stack-name "AWSWAFSecurityAutomations-${ENV_NAME}${BRANCH_NAME}" --template-url=https://$TEMPLATE_OUTPUT_BUCKET.s3.${AWS_REGION}.amazonaws.com/$SOLUTION_NAME/$VERSION/aws-waf-security-automations.template --parameters file://parameters.json --capabilities CAPABILITY_IAM
             echo "Cloudformation Updated"
             
 workflows:

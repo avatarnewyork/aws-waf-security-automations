@@ -421,6 +421,27 @@ Resources:
                 VendorName: AWS
                 Name: AWSManagedRulesWordPressRuleSet
           - !Ref 'AWS::NoValue'          
+        - !If
+          - AWSManagedRulesActivated          
+          - Name: AWS-AWSManagedRulesBotControlRuleSet
+            Priority: 15
+            OverrideAction:
+              None: {}
+            VisibilityConfig:
+              SampledRequestsEnabled: true
+              CloudWatchMetricsEnabled: true
+              MetricName: AWS-AWSManagedRulesBotControlRuleSet
+            Statement:
+              ManagedRuleGroupStatement:
+                VendorName: AWS
+                Name: AWSManagedRulesBotControlRuleSet
+                ExcludedRules:
+                  - Name: CategoryAdvertising
+                  - Name: CategoryMonitoring
+                  - Name: CategorySeo
+                  - Name: CategorySocialMedia
+                  - Name: CategorySearchEngine                    
+          - !Ref 'AWS::NoValue'          
         - Name: !Sub '${ParentStackName}WhitelistRule'
           Priority: 1
           Action:
@@ -656,14 +677,14 @@ Resources:
             Statement:
               OrStatement:
                 Statements:
-                  - XssMatchStatement:
-                      FieldToMatch:
-                        QueryString: {}
-                      TextTransformations:
-                        - Priority: 1
-                          Type: URL_DECODE
-                        - Priority: 2
-                          Type: HTML_ENTITY_DECODE
+                  #- XssMatchStatement:
+                  #    FieldToMatch:
+                  #      QueryString: {}
+                  #    TextTransformations:
+                  #      - Priority: 1
+                  #        Type: URL_DECODE
+                  #      - Priority: 2
+                  #        Type: HTML_ENTITY_DECODE
                   #- XssMatchStatement:
                   #    FieldToMatch:
                   #      Body: {}
